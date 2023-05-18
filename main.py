@@ -5,6 +5,9 @@ import numpy as np
 import pyautogui
 import pytesseract
 
+inGame = False
+wins = 0
+losses = 0
 
 def click(x, y):
     pyautogui.moveTo(x, y)
@@ -71,7 +74,13 @@ templates = {
     "gameNavigationReferences/wildModeSelected.png": "wildModeSelected",
     "gameNavigationReferences/casualModeSelected.png": "casualModeSelected",
     "gameNavigationReferences/casualModeSelect.png": "modeSelect",
-    "Buttons/PlayButton.png": "gameplayButton"
+    "Buttons/PlayButton.png": "gameplayButton",
+    "gameNavigationReferences/Confirm.png": "confirmButton",
+    "gameNavigationReferences/StartingHand.png": "startingHand",
+    "gameNavigationReferences/VictoryMessage.png": "victory",
+    "gameNavigationReferences/DefeatScreen.png": "defeat",
+
+
 }
 
 screenshot = pyautogui.screenshot()
@@ -79,9 +88,10 @@ currentScreen = detectScreenType(screenshot, templates)
 
 
 while True:
-    time.sleep(0.8)
+    time.sleep(1)
     screenshot = pyautogui.screenshot()
     currentScreen = detectScreenType(screenshot, templates)
+    print(wins, losses)
     print(currentScreen)
 
     if "mainMenu" in currentScreen:
@@ -89,18 +99,72 @@ while True:
 
     if "wildModeSelected" in currentScreen:
         click(721, 506)
-        time.sleep(0.5)
         print("changeGameMode")
-        time.sleep(0.3)
+        time.sleep(1)
         clickOnButtonWithOffset("gameNavigationReferences/wildModeSelected.png", threshold=0.6, minX=50, maxX=90, minY=5, maxY=51)
     if "modeSelect" in currentScreen:
+        time.sleep(1)
         clickOnButtonWithOffset("gameNavigationReferences/casualModeSelect.png", threshold=0.6, minX=150, maxX=320, minY=50, maxY=220)
         print("clickingOnCasual")
-        time.sleep(0.3)
-    if "casualModeSelected" and "gameplayButton" in currentScreen:
+
+    if "casualModeSelected" in currentScreen and "gameplayButton" in currentScreen and "wildModeSelected" not in currentScreen:
         clickOnButtonWithOffset("Buttons/PlayButton.png", threshold=0.6, minX=150, maxX=180, minY=50, maxY=220)
         print("clickingOnPlayButton")
-        time.sleep(0.3)
+        time.sleep(1)
     if "gameSearch" in currentScreen:
-        time.sleep(0.2)
+        time.sleep(0.5)
         print("findingAGame")
+
+    if "confirmButton" and "startingHand" in currentScreen:
+        clickOnButtonWithOffset("gameNavigationReferences/Confirm.png", threshold=0.6, minX=10, maxX=80, minY=10, maxY=50)
+        print("got Into game")
+        inGame = True
+        print("gamestate true")
+
+    while inGame:
+        screenshot = pyautogui.screenshot()
+        currentScreen = detectScreenType(screenshot, templates)
+        print(currentScreen)
+        time.sleep(2)
+        if "myTurn" in currentScreen:
+            print("it's my turn")
+            time.sleep(65)
+            print("clicking on end turn")
+            clickOnButtonWithOffset("gameNavigationReferences/EndTurn.png", threshold=0.6, minX=10, maxX=90, minY=30, maxY=600)
+        if "enemyTurn" in currentScreen:
+            print("enemy turn started")
+            time.sleep(0.8)
+            screenshot = pyautogui.screenshot()
+            currentScreen = detectScreenType(screenshot, templates)
+        if "endGame" in currentScreen:
+            screenshot = pyautogui.screenshot()
+            currentScreen = detectScreenType(screenshot, templates)
+            if "victory" in currentScreen:
+                print("victory!")
+                wins += 1
+            elif "defeat" in currentScreen:
+                print("defeat")
+                losses += 1
+            click(508,100)
+            time.sleep(3)
+            inGame = False
+            print("gamestate false")
+
+
+
+
+
+#    if "blizzardLogo" and not "playButtonClient" or 'mainMenu' in currentScreen:
+ #       click(1268, 1048)
+ #       print("clickign on icon")
+ #       time.sleep(0.5)
+ #       click(160, 930)
+ #       print("clicking on play")
+ #       time.sleep(30)
+ #       print("loading game preferably")
+ #       if not "mainMenu" in currentScreen:
+ #           click(160, 930)
+ #           print("game didnt started")
+ #           continue
+#       else:
+ #           continue
